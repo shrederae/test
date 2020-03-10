@@ -17,8 +17,8 @@ export default class App extends Component {
     this.getLocationAsync();
   }
 
-    handleMapRegionChange (mapRegion){
-    //  this.setState({ mapRegion });
+    handleMapRegionChange = (mapRegion) => {
+      this.setState({ mapRegion });
     }
 
   async getLocationAsync (){
