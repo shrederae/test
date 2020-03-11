@@ -1,78 +1,65 @@
-import React, { Component } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import MapView from 'react-native-maps';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
-import * as Location from 'expo-location';
+import React from 'react';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { StyleSheet, Button, View, Dimensions} from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer } from '@react-navigation/native';
 
+function PantallaPrincipal({ navigation }) {
+  return(
+    <View style={{ flex:1, alignItems: 'center', justifyContent: 'center'}}>
+    </View>
+  )
+}
 
-export default class App extends Component {
-  state = {
-    mapRegion: null,
-    hasLocationPermissions: false,
-    locationResult: null
-  };
-
-  componentDidMount() {
-    this.getLocationAsync();
-  }
-
-    handleMapRegionChange (mapRegion){
-    //  this.setState({ mapRegion });
+function PantallaMapa({ navigation }) {
+      return(
+          <View style={styles.estiloContenedor}>
+          <MapView style={styles.estiloMapa}
+          provider={PROVIDER_GOOGLE}
+          showsUserLocation
+          initialRegion={{
+                latitude: -32.696790,
+              longitude: -62.105270,
+             latitudeDelta: 0.0922,
+             longitudeDelta: 0.0421,
+          }}
+         />
+         <View style={styles.mapDrawerOverlay} />
+        </View>
+      )
     }
 
-  async getLocationAsync (){
-   let { status, permissions } = await Permissions.askAsync(Permissions.LOCATION);
-   if (status !== 'granted') {
-     this.setState({
-       locationResult: 'Permission to access location was denied',
-     });
-   } else {
-     this.setState({ hasLocationPermissions: true });
-   }
+const Drawer = createDrawerNavigator();
 
-   let location = await Location.getCurrentPositionAsync({});
-   this.setState({ locationResult: JSON.stringify(location) });
-   
-    this.setState({mapRegion: { latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }});
-  }
-  
-  getMapView = () => {
-    if (this.state.locationResult === null) {
-      return (<Text>Finding your current location...</Text>)
-    } else if (this.state.hasLocationPermissions === false) {
-       return (<Text>Location permissions are not granted.</Text>)
-    } else if (this.state.mapRegion === null) {
-       return (<Text>Map region doesn't exist</Text>)
-    } 
-  }
-  
-  render() {
-    return (
-      <View style={styles.container}>
-
-        {
-          <View>
-            {this.getMapView()}
-            <MapView
-              style={{ alignSelf: 'stretch', height: 400 }}
-              region={this.state.mapRegion}
-              onRegionChange={this.handleMapRegionChange}
-            />
-          </View>
-        }
-      </View>
-        
-    );
-  }
+export default class App extends React.Component {
+render() {
+  return (
+    <NavigationContainer>
+      <Drawer.Navigator initialRouteName="Home">
+        <Drawer.Screen name="Home" component={PantallaPrincipal} />
+        <Drawer.Screen name="Mapa" component={PantallaMapa} />
+    </Drawer.Navigator>
+    </NavigationContainer>
+  );
+ }
 }
 
 const styles = StyleSheet.create({
-  container: {
+  estiloMapa: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height
+  },
+  estiloContenedor: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
-    paddingTop: Constants.statusBarHeight,
+    justifyContent: 'center'
   },
-});
+  mapDrawerOverlay: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    opacity: 0.0,
+    height: Dimensions.get('window').height,
+    width: 10
+  }
+})
